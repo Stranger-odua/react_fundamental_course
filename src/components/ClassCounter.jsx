@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 
 class ClassCounter extends React.Component {
   constructor(props) {

@@ -1,11 +1,7 @@
 import React, {useState} from "react";
-import Counter from "./components/Counter";
-import ClassCounter from "./components/ClassCounter";
 import './styles/App.css'
-import PostItem from "./PostItem";
 import PostList from "./components/PostList";
-import MyButton from "./components/UI/button/MyButton";
-import MyInput from "./components/UI/input/MyInput";
+import PostForm from "./components/PostForm";
 
 
 
@@ -16,26 +12,13 @@ function App() {
     {id: 3, title: 'JavaScript 3', body: 'Description'}
   ])
 
-  const [title, setTitle] = useState('qwerty')
-
-  const addNewPost = () => {
-
+  const createPost = (newPost) => {
+    setPosts([...posts, newPost])
   }
-
-
 
   return (
     <div className="App">
-      <form>
-        {/*Управляемый компонет*/}
-        <MyInput
-          value={title}
-          type="text"
-          placeholder='Название поста'
-        />
-        <MyInput type="text" placeholder='Описание поста'/>
-        <MyButton onClick={addNewPost} >Создать пост</MyButton>
-      </form>
+      <PostForm create={createPost}/>
       <PostList posts={posts} title="Посты про JS"/>
     </div>
   );
