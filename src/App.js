@@ -1,37 +1,36 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import './styles/App.css'
 import PostList from "./components/PostList";
 import PostForm from "./components/PostForm";
-import MySelect from "./components/UI/select/MySelect";
-import MyInput from "./components/UI/input/MyInput";
+import PostFilter from "./components/PostFilter";
+import MyModal from "./components/UI/MyModal/MyModal";
+import MyButton from "./components/UI/button/MyButton";
+import {usePosts} from "./components/hooks/usePosts";
+import PostService from "./components/API/PostService";
+import Loader from "./components/UI/loader/Loader";
+import {useFetching} from "./components/hooks/useFetching";
 
 
 
 function App() {
-  const [posts, setPosts] = useState([
-    {id: 1, title: 'жжж', body: 'ттт'},
-    {id: 2, title: 'ооо', body: 'ммм'},
-    {id: 3, title: 'еее', body: 'ааа'}
-  ])
-
-  const [selectedSort, setSelectedSort] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
-
-
-  function getSortedPosts() {
-    console.log('Отработала функция getSortedPosts')
-    if (selectedSort) {
-      return [...posts].sort((a, b) => a[selectedSort].localeCompare(b[selectedSort]))
-    }
-    return posts
-  }
+  const [posts, setPosts] = useState([])
+  const [filter, setFilter] = useState({sort: '', query: ''})
+  const [modal, setModal] = useState(false)
+  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query)
+  const [fetchPosts, isPostsLoading, postError] = useFetching(async ()=>{
+    const posts = await PostService.getAll()
+    setPosts(posts)
+  })
 
 
-  const sortedPosts = getSortedPosts()
+  useEffect(() => {
+    fetchPosts()
+  }, [])
 
   // Получаем newPost из дочернего компонента и добавляем его к списку
   const createPost = (newPost) => {
     setPosts([...posts, newPost])
+    setModal(false)
   }
 
   // Получаем Post из дочернего компонента для его удаления
@@ -39,41 +38,29 @@ function App() {
     setPosts(posts.filter(p => p.id !== post.id))
   }
 
-  const sortPosts = (sort) => {
-    setSelectedSort(sort)
-  }
 
   return (
     <div className="App">
-      <PostForm create={createPost}/>
+      <button onClick={fetchPosts}>GET POSTS</button>
+      <MyButton style={{marginTop: '30px'}} onClick={() => setModal(true)}>
+        Создать пост
+      </MyButton>
+      <MyModal visible={modal} setVisible={setModal}>
+        <PostForm create={createPost}/>
+      </MyModal>
       <hr style={{margin: '15px 0'}}/>
-      <div>
-
-        <MyInput
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          placeholder='Поиск...'
-        />
-
-        <MySelect
-          value={selectedSort}
-          onChange={sortPosts}
-          defaultValue='Сортировка'
-          options={[
-            {value: 'title', name: 'По названию'},
-            {value: 'body', name: 'По описанию'}
-          ]}
-        />
-
-      </div>
-      {posts.length !== 0
-        ?
-        <PostList remove={removePost} posts={sortedPosts} title="Посты про JS"/>
-        :
-        <h1 style={{textAlign: 'center'}}>
-          Посты не были найдены!
-        </h1>
+      <PostFilter
+        filter={filter}
+        setFilter={setFilter}
+      />
+      {postError &&
+        <h1>Произошла ошибка {postError}</h1>
       }
+      {isPostsLoading
+        ? <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}><Loader/></div>
+        : <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS"/>
+      }
+
     </div>
   );
 }
