@@ -9,8 +9,9 @@ import {usePosts} from "./components/hooks/usePosts";
 import PostService from "./components/API/PostService";
 import Loader from "./components/UI/loader/Loader";
 import {useFetching} from "./components/hooks/useFetching";
-import {getPageCount, getPagesArray} from "./components/utils/pages";
+import {getPageCount} from "./components/utils/pages";
 import Pagination from "./components/UI/pagination/Pagination";
+import {usePagination} from "./components/hooks/usePagination";
 
 
 function App() {
@@ -21,7 +22,8 @@ function App() {
   const [limit, setLimit] = useState(10)
   const [page, setPage] = useState(1)
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query)
-  let pagesArray = getPagesArray(totalPages)
+  // let pagesArray = getPagesArray(totalPages)    // заменил на свой хук usePagination
+  let pagesArray = usePagination(totalPages)
 
   const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
     const response = await PostService.getAll(limit, page)
@@ -69,26 +71,23 @@ function App() {
         <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}><Loader/></div>
         : <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS"/>
       }
+      <Pagination
+        page={page}
+        changePage={changePage}
+        totalPages={totalPages}
+      />
 
-
-      <div className='page__wrapper'>
-        {pagesArray.map(p =>
-          <span
-            onClick={() => changePage(p)}
-            key={p}
-            className={page === p ? 'page page__current' : 'page'}
-          >
-              {p}
-            </span>
-        )}
-      </div>
-
-
-      {/*<Pagination*/}
-      {/*  page={page}*/}
-      {/*  changePage={changePage()}*/}
-      {/*  totalPages={totalPages}*/}
-      {/*/>*/}
+      {/*<div className='page__wrapper'>*/}
+      {/*  {pagesArray.map(p =>*/}
+      {/*    <span*/}
+      {/*      onClick={() => changePage(p)}*/}
+      {/*      key={p}*/}
+      {/*      className={page === p ? 'page page__current' : 'page'}*/}
+      {/*    >*/}
+      {/*        {p}*/}
+      {/*      </span>*/}
+      {/*  )}*/}
+      {/*</div>*/}
 
 
     </div>
