@@ -1,11 +1,11 @@
 import React from 'react';
-// import {getPagesArray} from "../../utils/pages";
-import {usePagination} from "../../hooks/usePagination";
+// import {usePagination} from "../../hooks/usePagination";
+import {getPagesArray} from "../../../utils/pages";
 
 
 const Pagination = ({totalPages, page, changePage}) => {
-  // let pagesArray = getPagesArray(totalPages)  // заменил на свой хук usePagination
-  let pagesArray = usePagination(totalPages)
+  let pagesArray = getPagesArray(totalPages)  // заменил на свой хук usePagination
+  // let pagesArray = usePagination(totalPages)
 
   return (
     <div className='page__wrapper'>
